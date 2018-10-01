@@ -1,0 +1,1 @@
+Basic optical character recognition
