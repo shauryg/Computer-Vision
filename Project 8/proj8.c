@@ -12,8 +12,6 @@ void get_3D_points(double **);
 
 void calc_surface_norm(double **, double **, int, int, distance);
 
-
-
 int main(void){
 
 	FILE *fpt;
