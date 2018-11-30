@@ -162,8 +162,7 @@ void get_3D_points(double **P){
   cp[1]/=1000000.0;		/* units are microseconds : 10^-6 */
   cp[4]/=1000.0;			/* units are milliseconds : 10^-3 */
   
-  switch(ImageTypeFlag)
-    {
+  switch(ImageTypeFlag){
     case 1:		/* Odetics image -- scan direction upward */
       ScanDirectionFlag=-1;
       break;
@@ -173,22 +172,22 @@ void get_3D_points(double **P){
     default:		/* in case we want to do this on synthetic model */
       ScanDirectionFlag=0;
       break;
-    }
+  }
   
   if (ImageTypeFlag != 3){
   	for (r=0; r<ROWS; r++){
-      	for (c=0; c<COLS; c++){
-  			SlantCorrection = cp[3]*cp[1]*((double)c-cp[2]);
-  			xangle = cp[0]*cp[1]*((double)c-cp[2]);
-  			yangle = (cp[3]*cp[4]*(cp[5]-(double)r)) + SlantCorrection*ScanDirectionFlag;	
-  			dist=(double)RangeImage[r*COLS+c]+cp[6];
+    	for (c=0; c<COLS; c++){
+			SlantCorrection = cp[3]*cp[1]*((double)c-cp[2]);
+			xangle = cp[0]*cp[1]*((double)c-cp[2]);
+			yangle = (cp[3]*cp[4]*(cp[5]-(double)r)) + SlantCorrection*ScanDirectionFlag;	
+			dist=(double)RangeImage[r*COLS+c]+cp[6];
+      
+      P[2][r*COLS + c] = sqrt((dist*dist)/(1.0+(tan(xangle)*tan(xangle)) + (tan(yangle)*tan(yangle))));
+			P[0][r*COLS + c] = tan(xangle)*P[2][r*COLS + c];
+			P[1][r*COLS + c] = tan(yangle)*P[2][r*COLS + c];
         
-        P[2][r*COLS + c] = sqrt((dist*dist)/(1.0+(tan(xangle)*tan(xangle)) + (tan(yangle)*tan(yangle))));
-  			P[0][r*COLS + c] = tan(xangle)*P[2][r*COLS + c];
-  			P[1][r*COLS + c] = tan(yangle)*P[2][r*COLS + c];
-        
-      	}
-    	}
+      }
+  	}
   }
 }
 
