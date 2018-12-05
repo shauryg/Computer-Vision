@@ -10,7 +10,7 @@
 
 #define SQR(x) ((x)*(x))
 
-void get_3D_points(double **);
+void get_3D_points(unsigned char *, double **);
 
 void calc_surface_norm(double **, double **, int, int, int);
 
@@ -59,7 +59,7 @@ int main(void){
   for(i = 0; i < 3; i++)
     *(P + i) = (double *)calloc(ROWS1 * COLS1, sizeof(double));
     
-	get_3D_points(P);
+	get_3D_points(image, P);
 
 	for(i = 0; i < 1; i++){
 		printf("\n3d coordinates pixel %d : %lf %lf %lf\n", i, P[0][i], P[1][i], P[2][i]);
@@ -89,19 +89,12 @@ int main(void){
 		printf("\nDistances %d : %lf\n", i, D[i]);
 	}
  
-  /*---------------------THRESHOLD BASED ON DISTANCE------------------*/
+  /*-------------------------------------------------------------------*/
   
-  threshold = (unsigned char *)calloc(ROWS1*COLS1,sizeof(unsigned char));
+  
+  
+  
 
-	for(i = 0; i < (ROWS1*COLS1); i++){
-		if(D[i] < 50)
-        	threshold[i] = 255;
-  }
-  
- 	fpt=fopen("chair-threshold.ppm","w");
-	fprintf(fpt,"P5 %d %d 255\n",COLS1,ROWS1);
-	fwrite(threshold,COLS1*ROWS1,1,fpt);
-	fclose(fpt); 
  
 	return 0;
 }
@@ -125,7 +118,7 @@ void calc_surface_norm(double **S, double **P, int row, int col, int distance){
   } 
 } 
 
-void get_3D_points(double **P){
+void get_3D_points(unsigned char *image, double **P){
 
   int	r,c;
   double cp[7];
@@ -133,19 +126,8 @@ void get_3D_points(double **P){
   double ScanDirectionFlag,SlantCorrection;
   unsigned char RangeImage[ROWS*COLS];
   int ImageTypeFlag;
-  char Filename[160];
-  FILE *fpt;
-  
-  strcpy(Filename, "chair-range.ppm");
-  
-  if ((fpt=fopen(Filename,"r")) == NULL){
-    printf("Couldn't open %s\n",Filename);
-    exit(0);
-  }
-  fread(RangeImage,1,128*128,fpt);
-  fclose(fpt);
-  
-  ImageTypeFlag = 1;
+
+  ImageTypeFlag = 0;
   
   cp[0]=1220.7;		/* horizontal mirror angular velocity in rpm */
   cp[1]=32.0;		/* scan time per single pixel in microseconds */
@@ -177,15 +159,14 @@ void get_3D_points(double **P){
   if (ImageTypeFlag != 3){
   	for (r=0; r<ROWS; r++){
     	for (c=0; c<COLS; c++){
-			SlantCorrection = cp[3]*cp[1]*((double)c-cp[2]);
-			xangle = cp[0]*cp[1]*((double)c-cp[2]);
-			yangle = (cp[3]*cp[4]*(cp[5]-(double)r)) + SlantCorrection*ScanDirectionFlag;	
-			dist=(double)RangeImage[r*COLS+c]+cp[6];
-      
-      P[2][r*COLS + c] = sqrt((dist*dist)/(1.0+(tan(xangle)*tan(xangle)) + (tan(yangle)*tan(yangle))));
-			P[0][r*COLS + c] = tan(xangle)*P[2][r*COLS + c];
-			P[1][r*COLS + c] = tan(yangle)*P[2][r*COLS + c];
-        
+  			SlantCorrection = cp[3]*cp[1]*((double)c-cp[2]);
+  			xangle = cp[0]*cp[1]*((double)c-cp[2]);
+  			yangle = (cp[3]*cp[4]*(cp[5]-(double)r)) + SlantCorrection*ScanDirectionFlag;	
+  			dist = (double)image[r*COLS+c]+cp[6];
+         
+        P[2][r*COLS + c] = sqrt((dist*dist)/(1.0+(tan(xangle)*tan(xangle)) + (tan(yangle)*tan(yangle))));
+  			P[0][r*COLS + c] = tan(xangle)*P[2][r*COLS + c];
+  			P[1][r*COLS + c] = tan(yangle)*P[2][r*COLS + c];
       }
   	}
   }
